@@ -28,7 +28,6 @@ void sensorTemperatureTask(void *pvParameters)
     {
         if (lock(temperatureSemaphore, timeout) == pdTRUE) {
             centerUnit.updateTemperature();
-            Serial.println(centerUnit.getCurrentTemperature());
             unlock(temperatureSemaphore);
             xTaskNotifyGive(tasks_handler[3]);
         } else {
@@ -75,8 +74,8 @@ void sensorDoorTask(void *pvParameters)
 void pullUpKeyTask(void *pvParameters)
 {
     TickType_t LastWakeTime = 0;
-    TickType_t period = pdMS_TO_TICKS(200); // 0.2 second
-    TickType_t timeout = pdMS_TO_TICKS(200); // 0.2 second timeout
+    TickType_t period = pdMS_TO_TICKS(100); // 0.2 second
+    TickType_t timeout = pdMS_TO_TICKS(100); // 0.2 second timeout
     while (true)
     {
         int key = NO_INPUT;
@@ -102,7 +101,7 @@ void pullUpKeyTask(void *pvParameters)
 
 void processTask(void *pvParameters)
 {
-    TickType_t timeout = pdMS_TO_TICKS(500); // 1 second timeout
+    TickType_t timeout = pdMS_TO_TICKS(500); // 0.5 second timeout
     while (true)
     {
         int key = NO_INPUT;

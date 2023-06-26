@@ -41,7 +41,7 @@ class ControlUnit : public SensorUnit, public SettingUnit
             int reading = -1;
 
             void updateSystem(int nextState);
-            int nextState(int reading);
+            int nextState();
             void enQueue(int value);
             int deQueue();
             SegmentDisplay sev[2];

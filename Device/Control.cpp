@@ -38,6 +38,7 @@ void ControlUnit::updateSystem(int nextState)
         lamp.turnOff();
         fan.turnOff();
         ionizer.turnOff();
+        buzzer.turnOff();
 
         sev[1].turnOff();
         sev[0].turnOff();
@@ -68,6 +69,7 @@ void ControlUnit::updateSystem(int nextState)
         lamp.turnOff();
         fan.turnOn();
         ionizer.turnOn();
+        buzzer.change(sound);
         return;
     }
 
@@ -117,6 +119,12 @@ void ControlUnit::process(int key)
     state[0] = false;
     state[1] = false;
     state[2] = true;
+
+    if (key == POWER) {
+        updateSystem(currentState == OFF); // true = 1 = INIT, false = 0 = OFF
+        return;
+    }
+
     if(currentState != OFF) 
         switch (key)
         {
@@ -140,20 +148,14 @@ void ControlUnit::process(int key)
             break;
         }
 
-    updateSystem(nextState(key));
+    updateSystem(nextState());
     
 }
 
-int ControlUnit::nextState(int reading)
+int ControlUnit::nextState()
 {
-    if(reading == POWER) 
-        return currentState == OFF; // true = 1 = INIT, false = 0 = OFF
-
     switch (currentState)
     {
-
-    case OFF:
-        return OFF;
 
     case INIT:
         lastStateTemp = getCurrentTemperature();
@@ -174,7 +176,7 @@ int ControlUnit::nextState(int reading)
         /* 
             conditon check is done
         */
-        if(getCurrentTemperature() - lastStateTemp > 0.000001f  && timer.getDelay(STATE_TIMER) > WORKTIME) {
+        if(getCurrentTemperature() - warningTemp > 0.000001f  && timer.getDelay(STATE_TIMER) > WORKTIME) {
             shouldRest = false;
             sound = true;
             lastStateTemp = getCurrentTemperature();
@@ -263,7 +265,8 @@ int ControlUnit::nextState(int reading)
                 conditon check is done
         */
         if(isDoorClose() ^ compressor.getState()) {
-            sound = false;
+            sound = true;
+            Serial.println(1);
             lastStateTemp = getCurrentTemperature();
             return FETAL_ERROR;
         }
@@ -285,7 +288,7 @@ int ControlUnit::nextState(int reading)
         /*
                 conditon check is done
         */
-        if(getCurrentTemperature() - lastStateTemp < 0.000001f) {
+        if(getCurrentTemperature() - lastStateTemp < -5.0f) {
             sound = false;
             lastStateTemp = getCurrentTemperature();
             return FETAL_ERROR;
@@ -376,7 +379,7 @@ String ControlUnit::getStatus(int currentStatus) {
         case 3:
             return "Door is Open";
         case 4:
-            return "Sleep";
+            return "Suspend";
         default:
             return "Not found";
     }
