@@ -33,13 +33,14 @@ class SensorUnit
       protected:
             TimerUnit timer;
             void begin();
-            void update();
       public:
             SensorUnit();
             SensorUnit(int pinLm35, int pinDoor, int pinKey);
             float getCurrentTemperature();
             bool isDoorClose();
             int readKey();
+            void updateTemperature();
+            void updateDoor();
 };
 
 #endif

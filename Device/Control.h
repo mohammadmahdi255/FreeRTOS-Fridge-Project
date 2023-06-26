@@ -34,11 +34,11 @@ class ControlUnit : public SensorUnit, public SettingUnit
 
             float lastStateTemp = 0.0f;
 
-            int showState = 0;
             bool show = true;
 
             bool shouldRest = false;
             bool sound = false;
+            int reading = -1;
 
             void updateSystem(int nextState);
             int nextState(int reading);
@@ -46,12 +46,17 @@ class ControlUnit : public SensorUnit, public SettingUnit
             int deQueue();
             SegmentDisplay sev[2];
       public:
-            int readWebKey = -1;
             ControlUnit();
             ControlUnit(int pinCompressor, int pinLamp, int pinFan, int pinIonizer, int pinBuzzer, bool isNormallyOpen, int pinKey, int pinLm35, int pinDoor, const int pinSev[], int pinSev0, int pinSev1);
+            int pullUpKey();
             int getState();
-            void process();
+            int getKey();
+            bool* getSevState();
+            void process(int key);
+            void updateSevSeg(int index);
             void displayTemp(float temp);
             String getStatus(int currentStatus);
+            void ControlUnit::sevOn();
+            void ControlUnit::sevOff();
 };
 #endif

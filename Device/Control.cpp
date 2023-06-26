@@ -98,17 +98,27 @@ int ControlUnit::getState()
     return currentState;
 }
 
-void ControlUnit::process()
+int ControlUnit::pullUpKey() {
+    reading = readKey();
+    return reading;
+}
+
+int ControlUnit::getKey() {
+    return reading;
+}
+
+bool* ControlUnit::getSevState(){
+    return state;
+}
+
+void ControlUnit::process(int key)
 {     
-    update();
-    int reading = readKey();
-    if(reading == -1) {
-        reading = readWebKey;
-        readWebKey = -1;
-    }
-    
+
+    state[0] = false;
+    state[1] = false;
+    state[2] = true;
     if(currentState != OFF) 
-        switch (reading)
+        switch (key)
         {
         case MUTE:
             buzzer.turnOff();
@@ -130,42 +140,7 @@ void ControlUnit::process()
             break;
         }
 
-    updateSystem(nextState(reading));
-
-    if(timer.getDelay(SEV_SEG_TIMER) > segTime[int(show)]) {
-        do {
-            showState = (showState + 1) % 3;
-        } while (!state[showState]);
-        timer.set(SEV_SEG_TIMER);
-    }
-
-    if(show && currentState != OFF) {
-        if(showState == UPDATE_TEMP) {
-            displayTemp(getTemperature());
-            state[UPDATE_TEMP] = false;
-            show = false;
-        } else if(showState == ERROR_DISPLAY) {
-                switch (currentState) {
-                    case FETAL_ERROR:
-                        sev[1].displayHex(15, false);
-                        sev[0].displayHex(14, false); 
-                        break;
-                    case EMERGENCY:
-                        sev[1].displayHex(14, false);
-                        sev[0].displayHex(14, false); 
-                        break;
-                }
-                state[ERROR_DISPLAY] = false;
-                show = false;
-        } else {
-            displayTemp(getCurrentTemperature());
-        }
-
-    } else {
-        sev[1].turnOff();
-        sev[0].turnOff(); 
-        show = true;    
-    }  
+    updateSystem(nextState(key));
     
 }
 
@@ -176,6 +151,9 @@ int ControlUnit::nextState(int reading)
 
     switch (currentState)
     {
+
+    case OFF:
+        return OFF;
 
     case INIT:
         lastStateTemp = getCurrentTemperature();
@@ -330,6 +308,38 @@ int ControlUnit::nextState(int reading)
     }
     return HOLDING;
 }
+
+void ControlUnit::updateSevSeg(int index) {
+    if(index == ERROR_DISPLAY) {
+            switch (currentState) {
+                case FETAL_ERROR:
+                    sev[1].displayHex(15, false);
+                    sev[0].displayHex(14, false); 
+                    break;
+                case EMERGENCY:
+                    sev[1].displayHex(14, false);
+                    sev[0].displayHex(14, false); 
+                    break;
+            }
+    } else if(index == UPDATE_TEMP) {
+        displayTemp(getTemperature());
+    } else if(index == TEMP_DISPLAY) {
+        displayTemp(getCurrentTemperature());
+    }
+}
+
+void ControlUnit::sevOn() {
+    if (currentState != OFF) {
+        sev[1].turnOn();
+        sev[0].turnOn();
+    }
+}
+
+void ControlUnit::sevOff() {
+    sev[1].turnOff();
+    sev[0].turnOff();
+}
+
 
 void ControlUnit::displayTemp(float temp)
 {

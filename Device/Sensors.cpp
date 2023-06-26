@@ -19,10 +19,14 @@ void SensorUnit::begin()
     pinMode(pinDoor, INPUT);
 }
 
-void SensorUnit::update()
+void SensorUnit::updateTemperature()
+{
+    currentTemperature = 40.0f * analogRead(pinLm35) / 325;
+}
+
+void SensorUnit::updateDoor()
 {
     doorClose = digitalRead(pinDoor);
-    currentTemperature = 40.0f * analogRead(pinLm35) / 325;
 }
 
 float SensorUnit::getCurrentTemperature()

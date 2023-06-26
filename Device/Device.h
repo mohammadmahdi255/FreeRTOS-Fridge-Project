@@ -1,10 +1,7 @@
 #ifndef DEVICE_CODE_H
 #define DEVICE_CODE_H
 
-#include <Wire.h>
 #include "Control.h"
-
-#define SLAVE_ADDRESS 8
 
 /* 
  *  Sensors and Input interfaces Pins
