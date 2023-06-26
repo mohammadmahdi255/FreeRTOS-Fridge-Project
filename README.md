@@ -1,1 +1,1 @@
-# FreeRTOS_Fridge_Project
+# FreeRTOS-Fridge-Project
